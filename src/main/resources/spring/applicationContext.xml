@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd 
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+
+	<!-- 1.配置包扫描 -->
+	<context:component-scan base-package="com.jt" />
+
+	<!-- 2.引入外部配置文件 -->
+	<context:property-placeholder
+		location="classpath:/properties/*.properties" />
+
+	<!-- 3.管理数据源 -->
+	<bean id="dataSource"
+		class="com.alibaba.druid.pool.DruidDataSource">
+		<property name="driverClassName" value="${jdbc.driver}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+	</bean>
+
+	<!-- 4.配置事务 a.开启注解 -->
+	<tx:annotation-driven />
+	<!-- b. 定义事务策略_配置事务管理器 -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<!-- c. 配置事务策略 事务传播属性 propagation = "REQUIRED"; 默认值 必须添加事务 propagation = 
+		"REQUIRED_NEW" 每次新操作都获得一个新的事务 propagation = "NEVER" 从不添加事务 propagation = 
+		"SUPPORTS" 事务支持的 新增(需要事务) 查询(本来不需要事务,但是线程一致的特性, 让查询和新增共用一个事务,发生错误时, 回滚到新增之前) 
+		查询 查询 不需要事务支持; -->
+	<tx:advice id="txAdvice"
+		transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="save*" propagation="REQUIRED" />
+			<tx:method name="update*" propagation="REQUIRED" />
+			<tx:method name="delete*" propagation="REQUIRED" />
+			<tx:method name="find*" propagation="REQUIRED" read-only="true" />
+			<tx:method name="*" propagation="SUPPORTS" read-only="true" />
+		</tx:attributes>
+	</tx:advice>
+	
+	<!-- d.配置事务切面AOP
+	五种通知类型(能否控制目标方法执行):
+	1.前置通知(beforeAdvice):目标方法执行之前;
+	2.后置通知(afterAdvice):目标方法执行之后;
+	3.异常通知(exceptionAdvice):目标方法执行之后抛出异常时执行;
+	4.最终通知(finallyAdvice):目标方法执行之后, 最后执行的通知;
+	(以上四种通知记录程序执行的四种状态)
+	5.环绕通知(roundAdvice):目标方法执行之前之后都要执行.(能通过程序控制程序是否执行)
+	
+	pointcut表达式:
+	within(packageName.className):按类匹配 配置的类中的方法执行时, 都要执行通知(粗粒度_实际开发中不用)
+	execution(返回值类型 包名.类名.方法名(参数列表)): 细粒度控制_实际开发中使用
+	execution(* com.jt.manage.service..*.*(..)): 任意返回值 service包下的任意类以及其子类且参数任意
+	
+	AOP总结:
+		在不改变原有代码的条件下, 对方法进行扩展.
+		切入点 + 通知方法
+	
+	 -->
+     <aop:config>
+     <aop:pointcut expression="execution(* com.jt.manage.service..*.*(..))" id="pc"/>
+     <aop:advisor advice-ref="txAdvice" pointcut-ref="pc"/>
+     </aop:config>
+
+</beans>
+
