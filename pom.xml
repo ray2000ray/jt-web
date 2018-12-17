@@ -28,6 +28,7 @@
 				<configuration>
 					<port>8092</port>
 					<path>/</path>
+					<skipTests>true</skipTests>   
 				</configuration>
 			</plugin>
 		</plugins>

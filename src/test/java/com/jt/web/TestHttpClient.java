@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
@@ -32,72 +33,77 @@ public class TestHttpClient {
 	 * 6.解析返回值
 	 * @throws IOException 
 	 * @throws ClientProtocolException 
+	 * @throws InterruptedException 
 	 */
-	@Test
-	public void testGet() throws ClientProtocolException, IOException {
-		CloseableHttpClient client = 
-		HttpClients.createDefault();
-		String fileName = "E:/Images";
-		File file = new File(fileName);
-		if (!file.exists()) {
-			file.mkdirs();
-		}
-		
-		
-		String url ="http://moe.005.tv/75403_2.html";
-		
-		HttpGet get = new HttpGet(url);
-		
-		List<String> imageList = new ArrayList<String>();
-		
-		CloseableHttpResponse response= client.execute(get);
-		
-		if(response.getStatusLine().getStatusCode()==200) {
-			String result = EntityUtils.toString(response.getEntity());
-			imageList = getPattern(result);
-		}
-		for(String ss: imageList) {
-		Long time = System.currentTimeMillis();
-		URL url1 = new URL(ss);
-		// 打开URL连接
-		URLConnection con = (URLConnection)url1.openConnection();
-		// 得到URL的输入流
-		InputStream input = con.getInputStream();
-		// 设置数据缓冲
-		byte[] bs = new byte[1024 * 10];
-		// 读取到的数据长度
-		int len;
-		// 输出的文件流保存图片至本地
-		String priceName = fileName + "/" + time + ".jpg";
-		OutputStream os = new FileOutputStream(priceName);
-		while ((len = input.read(bs)) != -1) {
-			os.write(bs, 0, len);
-		}
-		System.out.println("图片"+priceName+"已下载");
-		os.close();
-		input.close();
-		}
-		System.out.println("下载全部完成!");
-				
-	}
-	
-	//截取字符串中的图片超链接
-	public List<String> getPattern(String str) {
-		
-		Pattern pattern = Pattern.compile("<img.*\\.jpg");
-		Pattern pattern2 = Pattern.compile("http.*\\.jpg");
-		Matcher matcher = pattern.matcher(str);
-		List<String> result = new ArrayList<String>();
-		while(matcher.find()) {			
-			Matcher matcher2 = pattern2.matcher(matcher.group());
-			while(matcher2.find()) {
-				result.add(matcher2.group());
-				System.out.println(matcher2.group());
-			}				
-		}
-		return result;
-	}
-	
+//	@Test
+//	public void testGet() throws ClientProtocolException, IOException, InterruptedException {
+//		//创建发起请求对象
+//		CloseableHttpClient client = HttpClients.createDefault();
+//		String fileName = "E:/Images";
+//		File file = new File(fileName);
+//		if (!file.exists()) {
+//			file.mkdirs();
+//		}
+//		
+//		
+//		String url ="";
+//		
+//		HttpGet get = new HttpGet(url);
+//		//HttpPost post = new HttpPost(url);
+//		
+//		List<String> imageList = new ArrayList<String>();
+//		
+//		//CloseableHttpResponse response= client.execute(post);
+//		CloseableHttpResponse response= client.execute(get);
+//		
+//		if(response.getStatusLine().getStatusCode()==200) {
+//			System.out.println("获取数据成功!");
+//			String result = EntityUtils.toString(response.getEntity());
+//			imageList = getPattern(result);
+//		}
+//		for(String ss: imageList) {
+//		Long time = System.currentTimeMillis();
+//		Thread.sleep(3000);//延时3秒发送请求
+//		URL url1 = new URL(ss);
+//		// 打开URL连接
+//		URLConnection con = (URLConnection)url1.openConnection();
+//		// 得到URL的输入流
+//		InputStream input = con.getInputStream();
+//		// 设置数据缓冲
+//		byte[] bs = new byte[1024 * 10];
+//		// 读取到的数据长度
+//		int len;
+//		// 输出的文件流保存图片至本地
+//		String priceName = fileName + "/" + time + ".jpg";
+//		OutputStream os = new FileOutputStream(priceName);
+//		while ((len = input.read(bs)) != -1) {
+//			os.write(bs, 0, len);
+//		}
+//		System.out.println("图片"+priceName+"已下载");
+//		os.close();
+//		input.close();
+//		}
+//		System.out.println("下载全部完成!");
+//				
+//	}
+//	
+//	//截取字符串中的图片超链接
+//	public List<String> getPattern(String str) {
+//		
+//		Pattern pattern = Pattern.compile("<img.*\\.jpg");
+//		Pattern pattern2 = Pattern.compile("http.*\\.jpg");
+//		Matcher matcher = pattern.matcher(str);
+//		List<String> result = new ArrayList<String>();
+//		while(matcher.find()) {			
+//			Matcher matcher2 = pattern2.matcher(matcher.group());
+//			while(matcher2.find()) {
+//				result.add(matcher2.group());
+//				System.out.println(matcher2.group());
+//			}				
+//		}
+//		return result;
+//	}
+//	
 	
 	
 }
